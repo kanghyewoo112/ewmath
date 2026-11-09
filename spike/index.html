@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>은우의 수학탐험 (시안)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFF6E5; --ink:#2B2A33; --mute:#6B6A7B; --card:#fff;
+  --pink:#FF8FB1; --mint:#7FD8B5; --sky:#7DB9FF; --sun:#FFD166; --grape:#A98BFF; --coral:#FF9B71;
+  --ok:#3BB27A; --bad:#EF6A6A;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:'Jua','Noto Sans KR','Malgun Gothic',sans-serif;overflow:hidden;touch-action:manipulation}
+body{background:
+  radial-gradient(circle at 10% 15%,#FFE3EE 0 90px,transparent 91px),
+  radial-gradient(circle at 92% 80%,#DDF5E9 0 130px,transparent 131px),
+  radial-gradient(circle at 85% 8%,#E3EEFF 0 70px,transparent 71px),var(--bg)}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;padding:14px 22px 16px}
+.screen.on{display:flex}
+button{font-family:inherit;color:inherit;border:0;cursor:pointer}
+
+/* ---------- 지도 ---------- */
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{font-size:clamp(26px,4.4vw,40px);letter-spacing:-.5px;display:flex;align-items:center;gap:8px}
+.logo b{color:var(--pink)}
+.books{display:flex;gap:8px;margin-left:auto}
+.book{padding:8px 16px;border-radius:99px;background:#fff;font-size:20px;box-shadow:0 3px 0 #E8DCC4}
+.book.on{background:var(--sun);box-shadow:0 3px 0 #E0B347}
+.book.lock{opacity:.45}
+.sub{font-size:18px;color:var(--mute);margin:4px 2px 0}
+.mapwrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+#map{width:100%;height:100%;max-height:100%}
+.node{cursor:pointer}
+.node text{font-family:inherit}
+.hop{animation:hop 1s ease-in-out infinite;transform-box:fill-box;transform-origin:center bottom}
+@keyframes hop{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.foot{display:flex;justify-content:space-between;align-items:center;color:var(--mute);font-size:15px}
+.reset{background:transparent;color:var(--mute);font-size:15px;padding:6px 10px}
+
+/* ---------- 퀴즈 ---------- */
+.qtop{display:flex;align-items:center;gap:12px}
+.back{background:#fff;border-radius:16px;padding:10px 16px;font-size:20px;box-shadow:0 3px 0 #E8DCC4}
+.dots{display:flex;gap:8px;margin:0 auto}
+.dot{width:26px;height:26px;border-radius:50%;background:#fff;border:3px solid #E8DCC4;display:grid;place-items:center;font-size:14px}
+.dot.cur{border-color:var(--pink);transform:scale(1.2)}
+.dot.good{background:var(--mint);border-color:var(--mint)}
+.dot.miss{background:var(--sun);border-color:var(--sun)}
+.badge{padding:6px 16px;border-radius:99px;font-size:20px;color:#fff}
+.qbody{flex:1;min-height:0;display:flex;align-items:center;gap:20px;padding:6px 0}
+.mascot-col{width:clamp(110px,16vw,190px);flex:none;display:flex;flex-direction:column;align-items:center;gap:8px}
+.bubble{background:#fff;border-radius:20px;padding:10px 14px;font-size:18px;text-align:center;box-shadow:0 3px 0 #E8DCC4;min-height:48px;display:grid;place-items:center;width:100%}
+#mascot{width:100%}
+#mascot svg{width:100%;height:auto}
+.jump{animation:jump .5s ease}
+@keyframes jump{0%,100%{transform:translateY(0)}40%{transform:translateY(-26px) rotate(-6deg)}70%{transform:translateY(0) rotate(5deg)}}
+.card{flex:1;background:var(--card);border-radius:34px;box-shadow:0 6px 0 #E8DCC4;padding:22px 26px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;min-height:0;align-self:stretch}
+.ask{font-size:clamp(24px,3.6vw,36px);line-height:1.35}
+.vis{font-size:clamp(34px,5vw,54px);line-height:1.25;display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.big{font-size:clamp(40px,7vw,76px);letter-spacing:2px}
+.choices{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding-top:6px}
+@media (max-width:760px){.choices{grid-template-columns:repeat(2,1fr)}.qbody{flex-direction:column}.mascot-col{flex-direction:row;width:100%}#mascot{width:90px}}
+.ch{background:#fff;border-radius:28px;min-height:clamp(88px,14vh,130px);font-size:clamp(34px,5.4vw,56px);box-shadow:0 7px 0 var(--c,#E8DCC4);border:4px solid var(--c,#E8DCC4);transition:transform .08s}
+.ch:active{transform:translateY(5px);box-shadow:0 2px 0 var(--c,#E8DCC4)}
+.ch.right{background:var(--mint);border-color:var(--ok);box-shadow:0 7px 0 var(--ok);color:#fff}
+.ch.wrong{background:#FFE0E0;border-color:var(--bad);box-shadow:0 7px 0 var(--bad);animation:shake .4s;opacity:.7}
+.ch.small{font-size:clamp(26px,4vw,40px)}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+
+/* ---------- 결과 ---------- */
+.result{align-items:center;justify-content:center;text-align:center;gap:14px}
+.result h2{font-size:clamp(34px,6vw,56px);margin:0}
+.stars{font-size:clamp(60px,12vw,110px);letter-spacing:8px}
+.stars .off{filter:grayscale(1);opacity:.25}
+.stars span{display:inline-block;animation:pop .6s both}
+.stars span:nth-child(2){animation-delay:.25s}.stars span:nth-child(3){animation-delay:.5s}
+@keyframes pop{0%{transform:scale(0) rotate(-40deg)}70%{transform:scale(1.3) rotate(8deg)}100%{transform:scale(1)}}
+.rbtns{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.btn{padding:16px 30px;border-radius:99px;font-size:clamp(22px,3.2vw,30px);background:var(--pink);color:#fff;box-shadow:0 6px 0 #D96A90}
+.btn.alt{background:var(--sky);box-shadow:0 6px 0 #4F8FDC}
+.btn.ghost{background:#fff;color:var(--ink);box-shadow:0 6px 0 #E8DCC4}
+.msg{font-size:clamp(20px,3vw,28px);color:var(--mute)}
+
+/* ---------- 풍선 놀이 ---------- */
+.play{position:relative;flex:1;border-radius:34px;background:linear-gradient(#CFE8FF,#F4FBFF);box-shadow:0 6px 0 #BBD6F0;overflow:hidden;margin-top:10px}
+.balloon{position:absolute;width:clamp(86px,13vw,124px);height:clamp(104px,16vw,150px);border-radius:50% 50% 48% 48%;display:grid;place-items:center;font-size:clamp(36px,6vw,56px);color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.18);box-shadow:inset -10px -12px 0 rgba(0,0,0,.08);animation:float 3s ease-in-out infinite}
+.balloon::after{content:"";position:absolute;left:50%;bottom:-26px;width:3px;height:28px;background:#9aa;transform:translateX(-50%)}
+.balloon.pop{animation:boom .35s forwards}
+.balloon.no{animation:shake .4s}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@keyframes boom{to{transform:scale(1.8);opacity:0}}
+.next{font-size:clamp(24px,4vw,34px);background:#fff;border-radius:99px;padding:8px 22px;box-shadow:0 3px 0 #E8DCC4}
+.conf{position:fixed;top:-40px;font-size:34px;animation:fall linear forwards;pointer-events:none;z-index:9}
+@keyframes fall{to{transform:translateY(115vh) rotate(540deg)}}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:14px 26px;border-radius:99px;font-size:22px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:10}
+.toast.on{opacity:.95}
+</style>
+</head>
+<body>
+
+<!-- 지도 -->
+<section class="screen on" id="sMap">
+  <div class="top">
+    <div class="logo">🐰 <span>은우의 <b>수학탐험</b></span></div>
+    <div class="books" id="books"></div>
+  </div>
+  <div class="sub" id="mapSub"></div>
+  <div class="mapwrap"><svg id="map" viewBox="0 0 1000 725" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="foot"><span>※ 시안입니다. 1권 1~4번 마을만 열려 있어요.</span><button class="reset" id="resetBtn">↺ 처음부터</button></div>
+</section>
+
+<!-- 퀴즈 -->
+<section class="screen" id="sQuiz">
+  <div class="qtop">
+    <button class="back" id="qBack">🗺 지도</button>
+    <div class="dots" id="dots"></div>
+    <div class="badge" id="badge"></div>
+  </div>
+  <div class="qbody">
+    <div class="mascot-col"><div class="bubble" id="bubble"></div><div id="mascot"></div></div>
+    <div class="card" id="card"></div>
+  </div>
+  <div class="choices" id="choices"></div>
+</section>
+
+<!-- 결과 -->
+<section class="screen result" id="sResult"></section>
+
+<!-- 놀이 -->
+<section class="screen" id="sPlay">
+  <div class="qtop">
+    <button class="back" id="pBack">🗺 지도</button>
+    <div class="next" id="pNext" style="margin:0 auto"></div>
+    <div style="width:92px"></div>
+  </div>
+  <div class="play" id="playArea"></div>
+</section>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ 도우미 ============ */
+const $=s=>document.querySelector(s);
+const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[R(0,a.length-1)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=R(0,i);[a[i],a[j]]=[a[j],a[i]]}return a};
+const safe=(f,d)=>{try{return f()}catch(e){return d}};
+
+/* ============ 캐릭터 (책의 토끼·곰 그림 재사용) ============ */
+const BUNNY=`<svg viewBox="0 0 100 100"><ellipse cx="35" cy="24" rx="9" ry="20" fill="#fff" stroke="#2B2A33" stroke-width="3"/><ellipse cx="65" cy="24" rx="9" ry="20" fill="#fff" stroke="#2B2A33" stroke-width="3"/><ellipse cx="35" cy="26" rx="4" ry="12" fill="#FFB3C7"/><ellipse cx="65" cy="26" rx="4" ry="12" fill="#FFB3C7"/><circle cx="50" cy="62" r="32" fill="#fff" stroke="#2B2A33" stroke-width="3"/><circle cx="39" cy="58" r="3.5" fill="#2B2A33"/><circle cx="61" cy="58" r="3.5" fill="#2B2A33"/><ellipse cx="50" cy="66" rx="4" ry="3" fill="#F06595"/><path d="M44 72q6 6 12 0" fill="none" stroke="#2B2A33" stroke-width="2.5" stroke-linecap="round"/><circle cx="30" cy="68" r="5" fill="#FFB3C7" opacity=".7"/><circle cx="70" cy="68" r="5" fill="#FFB3C7" opacity=".7"/></svg>`;
+const BEAR=`<svg viewBox="0 0 100 100"><circle cx="24" cy="30" r="12" fill="#C98B5B" stroke="#2B2A33" stroke-width="3"/><circle cx="76" cy="30" r="12" fill="#C98B5B" stroke="#2B2A33" stroke-width="3"/><circle cx="50" cy="56" r="34" fill="#D9A06C" stroke="#2B2A33" stroke-width="3"/><ellipse cx="50" cy="68" rx="15" ry="11" fill="#F3D9B8"/><circle cx="39" cy="50" r="3.5" fill="#2B2A33"/><circle cx="61" cy="50" r="3.5" fill="#2B2A33"/><ellipse cx="50" cy="64" rx="5" ry="3.5" fill="#2B2A33"/><path d="M44 72q6 5 12 0" fill="none" stroke="#2B2A33" stroke-width="2.5" stroke-linecap="round"/></svg>`;
+const sized=(svg,w)=>svg.replace('<svg viewBox="0 0 100 100">',`<svg viewBox="0 0 100 100" width="${w}" height="${w}">`);
+
+/* ============ 마을 정보 (1권 1~12주, content.py 의 제목·범위) ============ */
+const VIL=[
+ ['숫자 마을','1~10','🏡'],['계단 마을','11~20','🪜'],['손가락 마을','5의 구조','🖐️'],['가르기 시장','10 가르기','🧺'],
+ ['열 개 묶음 마을','21~50','🍯'],['10 만들기 왕국','10 숙달','🏰'],['더하기 숲','합치기','🌳'],['빼기 호수','줄어들기','🦆'],
+ ['백 마을','51~100','💯'],['시계 탑 마을','규칙·시계','⏰'],['게임 마을','덧셈뺄셈','🎮'],['모험 졸업식','종합','🎓']
+];
+const OPEN=4; // 시안에서 열린 마을 수
+const CAT={calc:['연산','#E8793F'],think:['사고력','#7C5CE0'],shape:['도형','#2FA06A'],curr:['교과','#3C86E0'],ahead:['선행','#E0529C'],deep:['심화','#C98A00']};
+
+/* ============ 문제 만들기 ============ */
+function numChoices(ans,lo=0,hi=20){
+  const s=new Set([ans]);
+  let tries=0;
+  while(s.size<4&&tries++<80){const v=ans+pick([-3,-2,-1,1,2,3]);if(v>=lo&&v<=hi)s.add(v)}
+  let f=Math.max(lo,0);while(s.size<4)s.add(f++);
+  return shuffle([...s]).map(v=>({label:String(v),ok:v===ans}));
+}
+const Q=(cat,ask,vis,ch,opt={})=>({cat,ask,vis,ch,...opt});
+const items=['🍎','🐟','⭐','🌸','🍓','🐥'];
+
+const qCalc=(a,b)=>Q('calc','계산해 볼까요?',`<div class="big">${a} + ${b} = ?</div>`,numChoices(a+b));
+const qCount=()=>{const e=pick(items),n=R(3,9);return Q('curr','모두 몇 개일까요?',`<div class="vis">${e.repeat(n)}</div>`,numChoices(n,1,12))};
+const qPattern=()=>{const [x,y]=shuffle(items);const rest=items.filter(i=>i!==x&&i!==y);const [z,w]=shuffle(rest);
+  return Q('think','규칙을 찾아요. 물음표에 알맞은 것은?',`<div class="vis">${[x,y,x,y,x].join('')}❓</div>`,
+  shuffle([x,y,z,w]).map(v=>({label:v,ok:v===y})))};
+const SH={t:['🔺','세모',3],s:['🟦','네모',4],c:['🔵','동그라미',0]};
+const qShapeName=()=>{const k=pick([['변이 3개인 모양은?','t'],['꼭짓점이 4개인 모양은?','s'],['뾰족한 곳이 하나도 없는 모양은?','c']]);
+  return Q('shape',k[0],'',shuffle(Object.keys(SH)).map(x=>({label:SH[x][0]+' '+SH[x][1],ok:x===k[1]})),{small:true})};
+const qShapeCount=()=>{const t=R(1,5),s=R(1,5);const which=pick(['t','s']);const list=shuffle([...Array(t).fill('🔺'),...Array(s).fill('🟦')]).join('');
+  const n=which==='t'?t:s;return Q('shape',`${SH[which][1]}는 모두 몇 개일까요?`,`<div class="vis">${list}</div>`,numChoices(n,1,8))};
+const qSides=()=>{const w=pick(['t','s']);const side=pick(['변','꼭짓점']);return Q('shape',`${SH[w][1]}의 ${side}은 몇 개일까요?`,`<div class="big">${SH[w][0]}</div>`,numChoices(SH[w][2],0,7))};
+const qClue=()=>{const lo=R(2,5),hi=lo+3,no=lo+1,ans=lo+2;return Q('deep','비밀 숫자를 찾아요!',
+  `<div class="ask" style="line-height:1.7">① ${lo}보다 커요<br>② ${hi}보다 작아요<br>③ ${no}은 아니에요</div>`,numChoices(ans,0,12))};
+
+const BUILD=[
+ ()=>{ // 숫자 마을 1~10
+  const a=R(1,7),b=R(1,Math.min(9-a,6)),y=R(2,9);
+  return [qCalc(a,b),qPattern(),qSides(),qCount(),
+    Q('ahead','10을 만들어서 계산해 봐요!',`<div class="big">9 + ${y} = ?</div>`,numChoices(9+y,10,18),{hint:'9에 1을 주면 10이 돼요'}),
+    qClue()];
+ },
+ ()=>{ // 계단 마을 11~20
+  const b=R(1,9),n=R(11,19),st=R(10,13),t=R(2,5),u=R(1,9),a=R(11,15),c=a+R(3,5);
+  return [Q('calc','계산해 볼까요?',`<div class="big">10 + ${b} = ?</div>`,numChoices(10+b,10,19)),
+    Q('think','2씩 뛰어 세어요. 물음표는?',`<div class="big">${st}, ${st+2}, ${st+4}, ?</div>`,numChoices(st+6,10,20)),
+    qShapeCount(),
+    Q('curr','□에 알맞은 수는?',`<div class="big">${n} = 10과 □</div>`,numChoices(n-10,0,9)),
+    Q('ahead','10이 몇 개, 1이 몇 개일까요?',`<div class="big">${t}${u} = 10이 □개, 1이 ${u}개</div>`,numChoices(t,1,9)),
+    Q('deep',`${a}과 ${c} 사이에 있는 수는 모두 몇 개일까요?`,`<div class="big">${a} … ${c}</div>`,numChoices(c-a-1,1,6))];
+ },
+ ()=>{ // 손가락 마을 (5의 구조)
+  const b=R(1,9),k=R(1,4),n=R(6,10),a2=R(6,9),b2=R(6,9),f=R(1,4);
+  return [Q('calc','계산해 볼까요?',`<div class="big">5 + ${b} = ?</div>`,numChoices(5+b,6,14)),
+    Q('think',`한 손의 손가락은 5개예요. ${k}개를 접으면 펴 있는 손가락은 몇 개?`,`<div class="vis">🖐️</div>`,numChoices(5-k,0,5)),
+    qShapeName(),
+    Q('curr','□에 알맞은 수는?',`<div class="big">5 + □ = ${n}</div>`,numChoices(n-5,0,5)),
+    Q('ahead','5를 이용해서 계산해 봐요!',`<div class="big">${a2} + ${b2} = ?</div>`,numChoices(a2+b2,10,20)),
+    Q('deep',`한 손에 손가락 5개, 다른 손에 ${f}개를 폈어요. 접힌 손가락은 모두 몇 개일까요?`,`<div class="vis">🖐️✋</div>`,numChoices(10-5-f,1,9))];
+ },
+ ()=>{ // 가르기 시장 (10 가르기)
+  const a=R(1,9),d=pick([2,4,6]),c=R(2,8),x=R(8,9),y=R(4,9);
+  return [Q('calc','□에 알맞은 수는?',`<div class="big">${a} + □ = 10</div>`,numChoices(10-a,0,10)),
+    Q('think','규칙을 찾아요. 물음표는?',`<div class="big">9+1, 8+2, 7+3, 6+?</div>`,numChoices(4,1,9)),
+    qShapeCount(),
+    Q('curr','10을 두 수로 가르기 해요.',`<div class="big">10 = ${c} + □</div>`,numChoices(10-c,0,10)),
+    Q('ahead','10을 만들어서 계산해 봐요!',`<div class="big">${x} + ${y} = ?</div>`,numChoices(x+y,11,18)),
+    Q('deep',`콩 10개를 두 접시에 나눴어요. 한 접시가 다른 접시보다 ${d}개 많아요. 많은 접시에는 몇 개?`,`<div class="vis">🫘🫘🫘🫘🫘<br>🫘🫘🫘🫘🫘</div>`,numChoices((10+d)/2,5,10))];
+ }
+];
+
+/* ============ 진행 저장 ============ */
+const KEY='eunwoo_spike_v1';
+let prog=safe(()=>JSON.parse(localStorage.getItem(KEY)||'{}'),{});
+if(!prog||!prog.stars)prog={stars:{}};
+const save=()=>safe(()=>localStorage.setItem(KEY,JSON.stringify(prog)));
+const stars=i=>prog.stars[i]||0;
+const frontier=()=>{let i=0;while(i<OPEN&&stars(i)>0)i++;return i};
+
+/* ============ 소리 ============ */
+let ac;
+function beep(seq){safe(()=>{ac=ac||new (window.AudioContext||window.webkitAudioContext)();let t=ac.currentTime;
+  seq.forEach(([f,d])=>{const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.18,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+d);t+=d*.9})})}
+const sOk=()=>beep([[660,.12],[880,.18]]), sNo=()=>beep([[300,.2]]), sWin=()=>beep([[523,.12],[659,.12],[784,.12],[1047,.3]]);
+
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),1600)}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id))}
+function confetti(n=40){const em=['🎉','⭐','🌸','🎈','💖','✨'];for(let i=0;i<n;i++){const e=document.createElement('div');e.className='conf';e.textContent=pick(em);
+  e.style.left=R(0,98)+'vw';e.style.animationDuration=(1.8+Math.random()*1.8)+'s';e.style.animationDelay=Math.random()*.6+'s';document.body.appendChild(e);setTimeout(()=>e.remove(),4500)}}
+
+/* ============ 지도 화면 ============ */
+const POS=[[130,140],[370,140],[610,140],[850,140],[850,355],[610,355],[370,355],[130,355],[130,570],[370,570],[610,570],[850,570]];
+function drawMap(){
+  const m=$('#map');const fr=frontier();
+  const path='M130 140 H850 C975 140 975 355 850 355 H130 C25 355 25 570 130 570 H850';
+  let s=`<path d="${path}" fill="none" stroke="#fff" stroke-width="46" stroke-linecap="round"/><path d="${path}" fill="none" stroke="#FFD9A8" stroke-width="10" stroke-linecap="round" stroke-dasharray="2 22"/>`;
+  s+='<text x="500" y="28" text-anchor="middle" font-size="26" fill="#6B6A7B">탭해서 마을로 출발!</text>';
+  VIL.forEach((v,i)=>{
+    const [x,y]=POS[i],open=i<OPEN,unlocked=open&&i<=fr,done=stars(i)>0;
+    const fill=!open?'#E9E4D8':(unlocked?['#FFD1E1','#CFF1E3','#D5E7FF','#FFE9AE'][i%4]:'#EEE8DA');
+    s+=`<g class="node" data-i="${i}" transform="translate(${x} ${y})">
+      <circle r="78" cy="6" fill="rgba(0,0,0,.08)"/><circle r="78" fill="${fill}" stroke="#fff" stroke-width="8"/>
+      <text y="22" text-anchor="middle" font-size="62" opacity="${unlocked?1:.35}">${unlocked?v[2]:(open?'🔒':'🌫️')}</text>
+      <text y="-52" text-anchor="middle" font-size="22" fill="#fff" stroke="#8A7B5C" stroke-width="5" paint-order="stroke">${i+1}</text>
+      <text y="112" text-anchor="middle" font-size="26" fill="${unlocked?'#2B2A33':'#9A9585'}">${v[0]}</text>
+      <text y="138" text-anchor="middle" font-size="19" fill="#8A8798">${v[1]}</text>
+      ${done?`<text y="-84" text-anchor="middle" font-size="30">${'⭐'.repeat(stars(i))}</text>`:''}
+    </g>`;
+  });
+  const bi=Math.min(fr,OPEN-1),[bx,by]=POS[bi];
+  s+=`<g class="${fr<OPEN?'hop':''}" transform="translate(${bx+44} ${by-110})" style="pointer-events:none"><foreignObject width="90" height="90">${sized(BUNNY,80)}</foreignObject></g>`;
+  m.innerHTML=s;
+  m.querySelectorAll('.node').forEach(n=>n.addEventListener('click',()=>enterVillage(+n.dataset.i)));
+  const total=[...Array(OPEN).keys()].reduce((a,i)=>a+stars(i),0);
+  $('#mapSub').textContent=`1권 · 모은 별 ⭐ ${total}개  —  은우야, 오늘은 어느 마을에 갈까?`;
+}
+function drawBooks(){
+  $('#books').innerHTML=[1,2,3,4,5].map(n=>`<button class="book ${n===1?'on':'lock'}">${n}권${n===1?'':' 🔒'}</button>`).join('');
+  document.querySelectorAll('.book.lock').forEach(b=>b.onclick=()=>toast('이 책은 아직 시안에 없어요'));
+}
+function enterVillage(i){
+  if(i>=OPEN)return toast('이 마을은 곧 열려요 🌫️');
+  if(i>frontier())return toast('앞 마을을 먼저 통과해야 해요 🔒');
+  startQuiz(i);
+}
+
+/* ============ 퀴즈 ============ */
+let cur={i:0,qs:[],n:0,first:[],tried:false};
+function startQuiz(i){
+  cur={i,qs:shuffle(BUILD[i]()),n:0,first:[],tried:false};
+  show('sQuiz');renderQ();
+}
+function say(t,jump){$('#bubble').textContent=t;if(jump){const m=$('#mascot');m.classList.remove('jump');void m.offsetWidth;m.classList.add('jump')}}
+function renderQ(){
+  const q=cur.qs[cur.n];cur.tried=false;
+  $('#dots').innerHTML=cur.qs.map((_,k)=>`<div class="dot ${k===cur.n?'cur':''} ${cur.first[k]===true?'good':cur.first[k]===false?'miss':''}">${cur.first[k]===true?'✓':''}</div>`).join('');
+  const [nm,col]=CAT[q.cat];const b=$('#badge');b.textContent=nm;b.style.background=col;
+  $('#mascot').innerHTML=cur.i%2?BEAR:BUNNY;
+  $('#card').innerHTML=`<div class="ask">${q.ask}</div>${q.vis||''}`;
+  const c=$('#choices');c.innerHTML='';
+  q.ch.forEach(o=>{const bt=document.createElement('button');bt.className='ch'+(q.small||o.label.length>3?' small':'');bt.style.setProperty('--c',col);bt.innerHTML=o.label;
+    bt.onclick=()=>answer(bt,o);c.appendChild(bt)});
+  say(q.hint?'💡 '+q.hint:pick(['천천히 생각해 봐!','할 수 있어!','손가락으로 눌러 봐!']));
+}
+function answer(btn,o){
+  if(btn.classList.contains('wrong')||btn.classList.contains('right'))return;
+  if(o.ok){
+    btn.classList.add('right');sOk();say(pick(['와! 맞았어요! 🎉','정답이에요! 멋져요!','우와 대단해요! ⭐']),true);
+    if(cur.first[cur.n]===undefined)cur.first[cur.n]=true;
+    document.querySelectorAll('.ch').forEach(x=>x.style.pointerEvents='none');
+    setTimeout(()=>{cur.n++;cur.n<cur.qs.length?renderQ():finish()},1100);
+  }else{
+    btn.classList.add('wrong');sNo();cur.first[cur.n]=false;
+    say(pick(['괜찮아, 다시 한번 볼까?','아쉬워! 한 번 더!','천천히 다시 세어 봐요']));
+    $('#dots').children[cur.n].className='dot cur miss';
+  }
+}
+function finish(){
+  const good=cur.first.filter(x=>x===true).length;
+  const st=good>=6?3:good===5?2:good===4?1:0;
+  const pass=st>0;
+  if(pass){prog.stars[cur.i]=Math.max(stars(cur.i),st);save();sWin();confetti()}
+  const next=cur.i+1<OPEN;
+  $('#sResult').innerHTML=`<div style="width:130px">${cur.i%2?BEAR:BUNNY}</div>
+    <h2>${pass?'마을 통과! 🎉':'조금만 더 힘내요!'}</h2>
+    <div class="stars">${[0,1,2].map(k=>`<span class="${k<st?'':'off'}">⭐</span>`).join('')}</div>
+    <div class="msg">${VIL[cur.i][0]} · 6문제 중 ${good}문제를 한 번에 맞혔어요</div>
+    <div class="msg">${pass?(next?`다음 마을 「${VIL[cur.i+1][0]}」이 열렸어요!`:'시안의 마지막 마을까지 왔어요!'):'4문제 이상 한 번에 맞히면 통과예요'}</div>
+    <div class="rbtns">
+      ${pass?'<button class="btn alt" id="rPlay">🎈 놀이 시간!</button>':'<button class="btn" id="rRetry">🔁 다시 도전</button>'}
+      <button class="btn ghost" id="rMap">🗺 지도로</button>
+    </div>`;
+  show('sResult');
+  const r=$('#rPlay');if(r)r.onclick=startPlay;
+  const t=$('#rRetry');if(t)t.onclick=()=>startQuiz(cur.i);
+  $('#rMap').onclick=toMap;
+}
+function toMap(){drawMap();show('sMap')}
+
+/* ============ 마무리 놀이: 숫자 풍선을 1부터 차례로 ============ */
+function startPlay(){
+  show('sPlay');
+  const area=$('#playArea');area.innerHTML='';
+  const N=10,cols=5,rows=2;let want=1;
+  const pal=['#FF8FB1','#7DB9FF','#7FD8B5','#FFB04D','#A98BFF'];
+  const nums=shuffle([...Array(N).keys()].map(x=>x+1));
+  $('#pNext').textContent='1부터 차례로 톡톡! 다음은 1';
+  nums.forEach((n,k)=>{
+    const b=document.createElement('div');b.className='balloon';b.textContent=n;
+    const cx=(k%cols+.5)/cols*100,cy=(Math.floor(k/cols)+.5)/rows*100;
+    b.style.left=`calc(${cx+R(-3,3)}% - clamp(43px,6.5vw,62px))`;b.style.top=`calc(${cy+R(-6,2)}% - clamp(52px,8vw,75px))`;
+    b.style.background=pal[k%pal.length];b.style.animationDelay=(-Math.random()*3)+'s';
+    b.addEventListener('pointerdown',ev=>{ev.preventDefault();if(b.classList.contains('pop'))return;
+      if(n===want){b.classList.remove('no');b.classList.add('pop');sOk();want++;
+        if(want>N){$('#pNext').textContent='다 터뜨렸어요! 최고예요! 🎉';sWin();confetti(60);setTimeout(toMap,3200)}
+        else $('#pNext').textContent='다음은 '+want}
+      else{b.classList.remove('no');void b.offsetWidth;b.classList.add('no');sNo()}});
+    area.appendChild(b);
+  });
+}
+
+/* ============ 연결 ============ */
+$('#qBack').onclick=toMap;$('#pBack').onclick=toMap;
+$('#resetBtn').onclick=()=>{if(confirm('모은 별을 모두 지우고 처음부터 할까요?')){prog={stars:{}};save();drawMap()}};
+drawBooks();drawMap();
+</script>
+</body>
+</html>
