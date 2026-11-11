@@ -29,8 +29,8 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 .top{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .logo{font-size:clamp(26px,4.2vw,40px);letter-spacing:-.5px;display:flex;align-items:center;gap:8px;cursor:pointer}
 .logo b{color:var(--pink)}
-.books{display:flex;gap:8px;margin-left:auto}
-.book{padding:8px 16px;border-radius:99px;background:#fff;font-size:20px;box-shadow:0 3px 0 #E8DCC4;position:relative}
+.books{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
+.book{padding:6px 12px;border-radius:99px;background:#fff;font-size:18px;box-shadow:0 3px 0 #E8DCC4;position:relative}
 .book.on{background:var(--acc);box-shadow:0 3px 0 var(--accd)}
 .book.lock{opacity:.5}
 .sub{font-size:clamp(15px,2.2vw,19px);color:var(--mute);margin:4px 2px 0;display:flex;gap:14px;flex-wrap:wrap}
@@ -72,6 +72,8 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 .tb th,.tb td{border:3px solid #E8DCC4;padding:6px 22px}
 .tb th{background:#FFF0C2;font-weight:400}
 .vis svg{max-width:100%;height:auto}
+.gz{zoom:2.3;line-height:1.35;max-width:100%}
+@media (max-width:760px){.gz{zoom:1.6}}
 .choices{display:grid;gap:14px;padding-top:6px;grid-template-columns:repeat(var(--n,4),1fr)}
 @media (max-width:760px){.choices{grid-template-columns:repeat(2,1fr)}.qbody{flex-direction:column}.mascot-col{flex-direction:row;width:100%}#mascot{width:90px}}
 .ch{background:#fff;border-radius:28px;min-height:clamp(84px,13vh,128px);font-size:clamp(34px,5.4vw,56px);box-shadow:0 7px 0 var(--c,#E8DCC4);border:4px solid var(--c,#E8DCC4);transition:transform .08s;padding:4px 10px}
@@ -174,8 +176,8 @@ const mascotOf=(b,v)=>((b+v)%2?BEAR:BUNNY);
 /* ============ 설정 ============ */
 const CATS=['calc','think','shape','curr','ahead','deep'];
 const CAT={calc:['연산','#E8793F'],think:['사고력','#7C5CE0'],shape:['도형·측정','#2FA06A'],curr:['교과','#3C86E0'],ahead:['선행','#E0529C'],deep:['심화','#C98A00']};
-const ACCENT=[['#FFD166','#E0B347'],['#FFB3C7','#E58AA6'],['#9FE0C4','#6CC0A0'],['#A9CCFF','#7BA8E8'],['#D2C1FF','#A992E8']];
-const PASS=7; // 10문제 중 한 번에 맞혀야 하는 수
+const ACCENT=[['#FFD166','#E0B347'],['#FFB3C7','#E58AA6'],['#9FE0C4','#6CC0A0'],['#A9CCFF','#7BA8E8'],['#D2C1FF','#A992E8'],['#FFC9A3','#E8A070'],['#B8E6F0','#7FC3D6'],['#E5F0A8','#BBCB6B'],['#F5B8E0','#D98CC0'],['#C9D6FF','#9AACE8']];
+const PASS=10; // 15문제 중 한 번에 맞혀야 하는 수
 
 /* ============ 진행 저장 ============ */
 const KEY='eunwoo_v2';
@@ -251,55 +253,17 @@ let logoTaps=[];
 $('#logo').onclick=()=>{const t=Date.now();logoTaps=logoTaps.filter(x=>t-x<3000);logoTaps.push(t);
   if(logoTaps.length>=5){logoTaps=[];prog.dad=!prog.dad;save();toast(prog.dad?'아빠 모드 켜짐: 모든 마을이 열렸어요':'아빠 모드 꺼짐');toMap()}};
 
-/* ============ 퀴즈 만들기 (10문제: 복습 5 + 단계별로 어려워지는 5) ============ */
-const SLOTS=[
-  {cat:'calc',l:1,rv:1},{cat:'curr',l:1,rv:1},{cat:'shape',l:1,rv:1},{cat:'calc',l:2,rv:1},{cat:'think',l:2,rv:1}, // 1~5번 복습
-  {cat:'ahead',l:3},{cat:'calc',l:3},{cat:'shape',l:4},{cat:'think',l:4},{cat:'deep',l:5}                              // 6~10번 어려움
-];
-const WEEKS=(window.EW&&window.EW.weeks)||[];
-prog.seen=prog.seen||{};
-function pickFrom(g,slot,v,used,wantDad){
-  const list=WEEKS[g].q,seen=prog.seen[g]||[],m=v.m||1,j=v.j||0,base=[];
-  list.forEach((q,i)=>{
-    if(q.t!==slot.cat)return;
-    if(wantDad!==(q.d!==undefined))return;
-    if(used.has(q.a+q.v))return;
-    base.push({q,i});
-  });
-  const exact=slot.rv?(x=>x.q.l<=slot.l):(x=>x.q.l===slot.l);
-  const near=slot.rv?(x=>x.q.l<=slot.l+1):(x=>Math.abs(x.q.l-slot.l)<=1);
-  for(const f of [exact,near,()=>true]){
-    const c=base.filter(f);
-    if(!c.length)continue;
-    for(const part of [x=>g===v.g&&x.i%m===j,()=>true]){
-      const cs=c.filter(part);
-      if(!cs.length)continue;
-      let fresh=cs.filter(x=>!seen.includes(x.i));
-      if(!fresh.length){prog.seen[g]=seen.filter(i=>!cs.some(x=>x.i===i));fresh=cs}
-      const h=pick(fresh);
-      return {q:h.q,i:h.i,g};
-    }
-  }
-  return null;
-}
+/* ============ 퀴즈 만들기 (마을마다 15문제가 정해져 있어요: 1~5번 복습, 6~10번 중간, 11~15번 어려움) ============ */
 function buildQuiz(b,vi){
-  const v=BOOKS[b-1].v[vi],used=new Set(),qs=[];
-  let dadUsed=0;
-  SLOTS.forEach(slot=>{
-    let g=v.g;
-    if(slot.rv){const r=Math.random();g=r<.5?v.g:r<.8?v.g-1:v.g-2;if(g<0)g=v.g}
-    const wantDad=!dadUsed&&['think','deep'].includes(slot.cat)&&slot.l>=4&&Math.random()<.25;
-    const hit=(wantDad&&pickFrom(g,slot,v,used,true))||pickFrom(g,slot,v,used,false)||pickFrom(v.g,slot,v,used,false);
-    if(!hit)return;
-    const q=hit.q;
-    if(q.d!==undefined)dadUsed=1;
-    used.add(q.a+q.v);
-    (prog.seen[hit.g]=prog.seen[hit.g]||[]).push(hit.i);
-    if(prog.seen[hit.g].length>200)prog.seen[hit.g]=prog.seen[hit.g].slice(-120);
-    qs.push(Object.assign({cat:slot.cat,hardq:!slot.rv},q));
+  return BOOKS[b-1].v[vi].q.map(function(q,i){
+    var o=Object.assign({cat:q.t,hardq:i>=5},q);
+    if(q.d===undefined){ // 다시 풀 때는 보기 순서가 달라져요
+      var idx=shuffle(q.c.map(function(_,k){return k}));
+      o.c=idx.map(function(k){return q.c[k]});
+      o.k=idx.indexOf(q.k);
+    }
+    return o;
   });
-  save();
-  return qs;
 }
 
 /* ============ 퀴즈 진행 ============ */
@@ -319,7 +283,7 @@ function renderQ(){
     bt.onclick=()=>revealDad(q,col);c.appendChild(bt);
     say('아빠랑 함께 말해 보자!');return;
   }
-  c.style.setProperty('--n',Math.min(4,q.c.length));
+  c.style.setProperty('--n',q.w?2:Math.min(4,q.c.length));
   q.c.forEach((label,i)=>{const bt=document.createElement('button');bt.className='ch'+(q.s?' small':'');bt.style.setProperty('--c',col);bt.innerHTML=label;
     bt.onclick=()=>answer(bt,i===q.k);c.appendChild(bt)});
   say(pick(['천천히 생각해 봐!','할 수 있어!','손가락으로 톡 눌러 봐!']));

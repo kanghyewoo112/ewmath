@@ -12,8 +12,9 @@ CATS = [
     ('연산 준비', 'calc', 1, '수', '금', 8), ('정확도 향상', 'shape', 3, '수', '토', 8),
     ('심화·올림피아드', 'deep', 'olymp', '수', '토', 15)]
 CIRC = '①②③④⑤⑥⑦⑧⑨⑩'
-PER = 2  # 영역당 문제 수 (반쪽 기준)
-TALL = {'clock', 'clock_hour', 'length', 'group', 'data_most', 'data_diff'}
+PER = {6: 2, 7: 3, 8: 3, 9: 4, 10: 4}.get(B.NO, 2)  # 영역당 문제 수 (반쪽 기준)
+NCELL = {6: 8, 7: 8, 8: 10, 9: 10, 10: 10}.get(B.NO, 6)
+TALL = {'clock', 'clock_hour', 'length', 'group', 'data_most', 'data_diff'} | ({'skip', 'pat_num', 'reduce', 'frac_add_diff', 'frac_mul_int'} if B.NO >= 6 else set())
 
 
 def _pool(kinds, need, seed):
@@ -38,33 +39,40 @@ def all_items(w):
     n = w['n']
     spec = _probs.P[B.NO][n]
     x = _p2.X[B.NO][n]
-    base = (n - 1) * 36
+    base = (n - 1) * 18 * PER
     res = {0: [], 1: []}
     for i, (nm, col, kk, dA, dB, mins) in enumerate(CATS):
         if isinstance(kk, str):
             key = {'think': 'think', 'apply': 'apply', 'concept': 'concept', 'grade': 'grade', 'olymp': 'olymp'}[kk]
             lst = [spec[key]] + list(x[key])
+            while len(lst) < 2 * PER:
+                lst = lst + lst
             for half in (0, 1):
                 ps = []
                 for j in range(PER):
-                    q, a = lst[half * 2 + j]
+                    q, a = lst[half * PER + j]
                     ps.append(dict(kind='hand', q=q, ans=a))
                 res[half].append(ps)
         else:
             cs = spec['c']
             kinds = [cs[kk]] + [c for c in cs if c != cs[kk]]
-            ncell = 4 if cs[kk] in TALL else 6
-            pool = _pool(kinds, ncell * 4, B.NO * 1000 + n * 20 + i)
+            ncell = (4 if cs[kk] in TALL else NCELL)
+            if B.NO >= 6 and cs[kk] not in TALL:
+                import re as _re
+                _smp = [len(_re.sub('<[^>]+>', '', h_)) for h_, a_ in _gen.kind_items(cs[kk], 6, 5)]
+                _m = sum(_smp) / max(1, len(_smp))
+                ncell = min(ncell, 4 if _m > 20 else 5 if _m > 11 else ncell)
+            pool = _pool(kinds, ncell * PER * 2, B.NO * 1000 + n * 20 + i)
             for half in (0, 1):
                 ps = []
                 for j in range(PER):
-                    sl = pool[half * 2 * ncell + j * ncell: half * 2 * ncell + (j + 1) * ncell]
+                    sl = pool[half * PER * ncell + j * ncell: half * PER * ncell + (j + 1) * ncell]
                     ps.append(dict(kind='set', cells=[s[0] for s in sl], ans='  '.join(f'{CIRC[t]} {s[1]}' for t, s in enumerate(sl))))
                 res[half].append(ps)
     for half in (0, 1):
         for i in range(9):
             for j in range(PER):
-                res[half][i][j]['no'] = base + half * 18 + 2 * i + j + 1
+                res[half][i][j]['no'] = base + half * 9 * PER + PER * i + j + 1
     return res
 
 
@@ -161,23 +169,26 @@ def extra_pages(w, half):
 def answer_pages(m):
     ws = [w for w in WEEKS if w['m'] == m]
     pages = []
-    for k in range(0, len(ws), 2):
+    step = 2 if PER == 2 else 1
+    for k in range(0, len(ws), step):
         cols = ''
-        for w in ws[k:k + 2]:
+        for w in ws[k:k + step]:
             its = all_items(w)
             lines = ''
             for half in (0, 1):
-                lines += f'<div style="font-size:11.5px;font-weight:700;color:#BE185D;margin:4px 0 1px">{SIDE[half]}</div>'
+                lines += f'<div style="font-size:11.5px;font-weight:700;color:#BE185D;margin:4px 0 1px;break-after:avoid">{SIDE[half]}</div>'
                 for i in range(9):
                     for pr in its[half][i]:
-                        lines += f'<div style="display:flex;gap:6px;font-size:10.8px;line-height:1.38;padding:1px 0;border-bottom:1px dotted #E4E2EC"><b style="flex:0 0 28px;color:#6C4FD6">{pr["no"]}</b><span style="flex:1">{pr["ans"]}</span></div>'
-            cols += f'<div style="flex:1;min-width:0;border:1.5px solid #7A798A;border-radius:12px;background:#fff;padding:6px 10px;box-sizing:border-box;align-self:flex-start"><div style="font-family:Jua;font-size:15px;margin-bottom:2px">{w["n"]}주 · {w["title"]}</div>{lines}</div>'
+                        lines += f'<div style="display:flex;gap:6px;font-size:10.8px;line-height:1.38;padding:1px 0;border-bottom:1px dotted #E4E2EC;break-inside:avoid"><b style="flex:0 0 30px;color:#6C4FD6">{pr["no"]}</b><span style="flex:1">{pr["ans"]}</span></div>'
+            body = lines if PER == 2 else f'<div style="column-count:2;column-gap:14px">{lines}</div>'
+            cols += f'<div style="flex:1;min-width:0;border:1.5px solid #7A798A;border-radius:12px;background:#fff;padding:6px 10px;box-sizing:border-box;align-self:flex-start"><div style="font-family:Jua;font-size:15px;margin-bottom:2px">{w["n"]}주 · {w["title"]}</div>{body}</div>'
         intro = p("아이가 풀 때 정답을 먼저 보여 주지 않아요. 틀리면 ① 다시 읽기 → ② 그림·콩으로 보기 → ③ 힌트 하나 → ④ 스스로 해결. 풀이가 달라도 이유를 말하면 맞아요. 아래는 한 가지 예시 답이에요.", 12.5, MUTE) if k == 0 else ''
+        tot = (len(ws) + step - 1) // step
         inner = f'''
-<div style="height:50px;flex:none;display:flex;align-items:center;gap:12px">{bear(44)}{h(f"{m}개월차 정답과 지도 (부모용) {k // 2 + 1}/{(len(ws) + 1) // 2}", 24)}</div>
+<div style="height:50px;flex:none;display:flex;align-items:center;gap:12px">{bear(44)}{h(f"{m}개월차 정답과 지도 (부모용) {k // step + 1}/{tot}", 24)}</div>
 {intro}
 <div style="display:flex;gap:10px;flex:none;align-items:flex-start">{cols}</div>
 <div style="flex:1"></div>{{FOOT}}
 '''
-        pages.append(doc(f'{m}개월차 정답 {k // 2 + 1}', inner, pad='26px 40px', gap=6))
+        pages.append(doc(f'{m}개월차 정답 {k // step + 1}', inner, pad='26px 40px', gap=6))
     return pages

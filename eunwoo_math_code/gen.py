@@ -29,6 +29,10 @@ def kind_items(kind, n, seed):
 
 
 def _one(k, R, i):
+    from gen2 import one2
+    _r = one2(k, R, i)
+    if _r is not NotImplemented:
+        return _r
     # each branch returns (html, answer, key)
     if k == 'make10':
         a = R.randint(1, 9); return _e(a, '+', '□', 10), str(10 - a), (a,)
