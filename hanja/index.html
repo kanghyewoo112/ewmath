@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>은우의 수학 · 한자 허브</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&family=Noto+Serif+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:'Gowun Dodum',sans-serif;color:#1F1B16;background:#BFE3FF;min-height:100vh;transition:background .25s}
+body[data-mode="hanja"]{background:#F5EEDC}
+.wrap{max-width:880px;margin:0 auto;padding:28px 20px 56px}
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px}
+.brand{font-size:15px;color:#3b3a36;margin:0}
+.toggle{display:flex;border:2px solid #1F1B16;border-radius:999px;overflow:hidden;background:#fff}
+.toggle a{display:block;min-height:48px;padding:0 26px;line-height:48px;font-size:18px;font-weight:700;color:#1F1B16;text-decoration:none}
+body[data-mode="math"] .toggle a.m{background:#6C4FD6;color:#fff}
+body[data-mode="hanja"] .toggle a.h{background:#B3261E;color:#fff}
+.toggle a:focus-visible{outline:3px solid #1F1B16;outline-offset:-5px}
+h1{margin:34px 0 8px;line-height:1.15}
+body[data-mode="math"] h1{font-family:'Jua',sans-serif;font-size:46px;font-weight:400;color:#2a2470}
+body[data-mode="hanja"] h1{font-family:'Noto Serif KR',serif;font-size:42px;font-weight:900}
+.lead{font-size:18px;line-height:1.55;margin:0 0 26px;max-width:620px}
+.sec{display:none}
+body[data-mode="math"] .sec.math{display:block}
+body[data-mode="hanja"] .sec.hanja{display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.card{display:block;text-decoration:none;color:inherit;padding:22px;border-radius:20px;border:2px solid #1F1B16;background:#fff;min-height:150px}
+.card:hover{transform:translateY(-2px)}
+.card:focus-visible{outline:3px solid #1F1B16;outline-offset:3px}
+.card b{display:block;font-size:22px;margin-bottom:6px}
+.card span{display:block;font-size:16px;line-height:1.5;color:#3b3a36}
+.card em{display:inline-block;margin-top:12px;font-style:normal;font-weight:700;font-size:16px}
+.math .card b{font-family:'Jua',sans-serif;font-weight:400;font-size:24px}
+.math .card em{color:#4a35a8}
+.hanja .card{background:#FCF8EC;border-radius:6px}
+.hanja .card b{font-family:'Noto Serif KR',serif;font-weight:900}
+.hanja .card em{color:#B3261E}
+.hanja .mark{float:right;font-family:'Noto Serif KR',serif;font-weight:900;font-size:44px;line-height:1;color:#B3261E;margin-left:10px}
+.note{margin-top:26px;font-size:15px;color:#3b3a36}
+</style>
+</head>
+<body data-mode="math">
+<div class="wrap">
+  <div class="top">
+    <p class="brand">은우의 공부 길</p>
+    <nav class="toggle" aria-label="과목 바꾸기">
+      <a class="m" href="#math">수학</a>
+      <a class="h" href="#hanja">한자</a>
+    </nav>
+  </div>
+
+  <section class="sec math" aria-label="수학">
+    <h1>은우의 수학 모험</h1>
+    <p class="lead">사고력 수학 로드맵을 12주씩, 주간 학습지로 이어 가는 책이에요. 아래에서 지금 펼칠 권을 골라요.</p>
+    <div class="grid">
+      <a class="card" href="../"><b>수학탐험 퀴즈</b><span>책 한 단원을 마친 뒤 태블릿으로 푸는 복습 퀴즈</span><em>열기</em></a>
+      <a class="card" href="https://claude.ai/artifact/9QPnmPa8nAASKXSKJaooDK" target="_blank" rel="noopener"><b>1권</b><span>6세 · 12주 학습지와 점검 기록</span><em>열기</em></a>
+      <a class="card" href="https://claude.ai/artifact/96NEY6iN4vLWJq3GgnoEoF" target="_blank" rel="noopener"><b>2~5권</b><span>7세에서 초1까지 · 권마다 12주</span><em>열기</em></a>
+    </div>
+    <p class="note">위의 &lsquo;한자&rsquo; 버튼을 누르면 한자 책으로 바뀌어요.</p>
+  </section>
+
+  <section class="sec hanja" aria-label="한자">
+    <h1>은우의 한자 모험</h1>
+    <p class="lead">한 챕터를 30일 코스로 나누고, 끝에 확인 문제 10개를 풀어요. 기초 1~3단계와 8급 한자 50자까지 먼저 담았어요.</p>
+    <div class="grid">
+      <a class="card" href="https://claude.ai/artifact/REsp7zhAju8aLdBY3G5f57" target="_blank" rel="noopener"><span class="mark" aria-hidden="true">漢</span><b>한자 전체 책</b><span>표지에서 4권을 골라 시작해요</span><em>열기</em></a>
+      <a class="card" href="https://claude.ai/artifact/REsp7zhAju8aLdBY3G5f57#page-b1" target="_blank" rel="noopener"><span class="mark" aria-hidden="true">筆</span><b>기초 1단계</b><span>획과 필순 · 7챕터</span><em>바로 가기</em></a>
+      <a class="card" href="https://claude.ai/artifact/REsp7zhAju8aLdBY3G5f57#page-b2" target="_blank" rel="noopener"><span class="mark" aria-hidden="true">部</span><b>기초 2단계</b><span>부수 · 3챕터</span><em>바로 가기</em></a>
+      <a class="card" href="https://claude.ai/artifact/REsp7zhAju8aLdBY3G5f57#page-b3" target="_blank" rel="noopener"><span class="mark" aria-hidden="true">語</span><b>기초 3단계</b><span>한자어와 8급 준비 · 4챕터</span><em>바로 가기</em></a>
+      <a class="card" href="https://claude.ai/artifact/REsp7zhAju8aLdBY3G5f57#page-b8" target="_blank" rel="noopener"><span class="mark" aria-hidden="true">八</span><b>8급 한자</b><span>신습한자 50자 · 5단원</span><em>바로 가기</em></a>
+    </div>
+    <p class="note">위의 &lsquo;수학&rsquo; 버튼을 누르면 수학 책으로 돌아가요.</p>
+  </section>
+</div>
+<script>
+(function(){
+  function sync(){
+    var h = (location.hash || '').replace('#','');
+    document.body.setAttribute('data-mode', h === 'hanja' ? 'hanja' : 'math');
+    document.title = h === 'hanja' ? '은우의 한자 모험 · 허브' : '은우의 수학 모험 · 허브';
+  }
+  window.addEventListener('hashchange', sync);
+  sync();
+})();
+</script>
+</body>
+</html>
